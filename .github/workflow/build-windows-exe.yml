@@ -1,0 +1,35 @@
+name: build-windows-exe
+
+on:
+  push:
+    branches: [ main ]          # build every commit that lands on main
+  workflow_dispatch:            # …and allow manual runs from the Actions tab
+
+jobs:
+  build:
+    runs-on: windows-latest     # GitHub spins up a real Windows Server VM
+    steps:
+      # 1️⃣  Check out your code
+      - uses: actions/checkout@v4
+
+      # 2️⃣  Install Python (pick any version you like)
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+
+      # 3️⃣  Install app deps + PyInstaller
+      - name: Install dependencies
+        run: |
+          python -m pip install --upgrade pip
+          pip install -r requirements.txt pyinstaller
+
+      # 4️⃣  Build a single, windowed executable
+      - name: Build EXE
+        run: pyinstaller --onefile --windowed ga_simulator.py
+
+      # 5️⃣  Upload the artifact so you can download it from the run page
+      - name: Upload artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: GA_Magic_Square
+          path: dist/ga_simulator.exe
